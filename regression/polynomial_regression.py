@@ -8,7 +8,7 @@ import math
 
 # Parameters
 polynomial_degree = 4
-test_size = 0.2
+test_size = 0.05
 quandl_dataset = "WIKI/FB"
 
 # Importing the dataset
@@ -17,6 +17,8 @@ dataset = dataset.reset_index()
 
 # Converting the dates to an integer number of days since the start of the data
 dataset['Date'] = (dataset['Date'] - dataset['Date'].min())  / np.timedelta64(1,'D')
+#dataset['Date'] = [date.timetuple().tm_yday for date in dataset['Date']]
+#dataset['Date'] = [date.isocalendar()[1] for date in dataset['Date']]
 X = dataset.iloc[:, 0:1].values
 y = dataset.iloc[:, 4].values
 
