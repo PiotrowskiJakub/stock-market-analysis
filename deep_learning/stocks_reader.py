@@ -34,7 +34,7 @@ num_metrics = 2
 stock_data = np.ndarray(shape=(num_days, num_stocks * num_metrics), dtype=np.float32)
 """
 
-stock_data = result = [[] for _ in range(num_days)]
+stock_data = [[] for _ in range(num_days)]
 factors_price = np.ndarray(shape=(num_stocks), dtype=np.float32)
 factors_volume = np.ndarray(shape=(num_stocks), dtype=np.float32)
 
