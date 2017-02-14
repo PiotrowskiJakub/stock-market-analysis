@@ -23,6 +23,8 @@ end_date = date(2017, 2, 13)
 
 data = quandl.get(companies, start_date=start_date, end_date=end_date)
 
+# There is no data for weekends, so end_date - start_date isn't best thing to do here
+# Instead take first dimension from API data (days x metrics)
 num_days = data.shape[0]
 num_stocks = len(companies)
 
@@ -35,10 +37,6 @@ stock_data = np.ndarray(shape=(num_days, num_stocks * num_metrics), dtype=np.flo
 stock_data = result = [[] for _ in range(num_days)]
 factors_price = np.ndarray(shape=(num_stocks), dtype=np.float32)
 factors_volume = np.ndarray(shape=(num_stocks), dtype=np.float32)
-
-#There is no data for weekends, so end_date - start_date isn't best thing to do here
-#Instead take first dimension from API data (days x metrics)
-num_days = data.shape[0]
 
 # For each company get first price and volume to normalize data
 # Store it for de-normalization
