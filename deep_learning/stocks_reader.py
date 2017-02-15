@@ -41,7 +41,7 @@ factors_volume = np.ndarray(shape=(num_stocks), dtype=np.float32)
 # For each company get first price and volume to normalize data
 # Store it for de-normalization
 for idx, company in enumerate(companies):
-    factors_price[idx] = data[company + ' - Open'][0]
+    factors_price[idx] = data[company + ' - Adj. Close'][0]
     factors_volume[idx] = data[company + ' - Volume'][0]
     
 """ ndarray solution, this is really fucked up.
@@ -57,7 +57,7 @@ for day_idx in range(num_days):
 # Use python arrays to collect data and then convert to numpy ndarray
 for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
-        stock_data[day_idx].append((data[company + ' - Close'][day_idx] - data[company + ' - Open'][day_idx]) / factors_price[company_idx])
+        stock_data[day_idx].append(data[company + ' - Adj. Close'][day_idx] / factors_price[company_idx])
         stock_data[day_idx].append(data[company + ' - Volume'][day_idx] / factors_volume[company_idx])
         
         
