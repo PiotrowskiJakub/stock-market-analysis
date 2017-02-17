@@ -36,7 +36,7 @@ class Model:
 
     @lazy_property
     def optimize(self):
-        loss = tf.nn.l2_loss(tf.sub(self.prediction, self.target))
+        loss = tf.nn.l2_loss(tf.subtract(self.prediction, self.target))
         optimizer = tf.train.AdamOptimizer()
         return optimizer.minimize(loss)
 
@@ -45,18 +45,3 @@ class Model:
         mistakes = tf.not_equal(
             tf.argmax(self.target, 1), tf.argmax(self.prediction, 1))
         return tf.reduce_mean(tf.cast(mistakes, tf.float32))
-
-    def gru():
-        ALPHASIZE = 98
-        CELLSIZE = 512
-        NLAYERS = 3
-        SEQLEN = 30
-
-        cell = tf.contrib.rnn.GRUCell(CELLSIZE)
-        mcell = tf.contrib.rnn.MultiRNNCell([cell] * NLAYERS, state_is_tuple = False)
-        Hr, H = tf.nn.dynamic_rnn(mcell, X, initial_state = Hin)
-        # Hr [BATCHSIZE, SQLEN, CELLSIZE]
-        Hf = tf.reshape(Hr, [-1, CELLSIZE]) # [BATCHSIZE * SEQLEN, CELLSIZE]
-        Ylogits = layers.linear(Hf, ALPHASIZE) # [BATCHSIZE * SEQLEN, ALPHASIZE]
-        Y = tf.nn.softmax(Ylogits) # [BATCHSIZE * SEQLEN, ALPHASIZE]
-        loss = tf.nn.softmax_cross_entropy_with_logits(Ylogits, Y)
