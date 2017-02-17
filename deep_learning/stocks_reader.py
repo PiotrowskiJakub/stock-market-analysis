@@ -38,7 +38,7 @@ for day_idx in range(num_days):
 
 for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
-        output_data[day_idx].append([data[company + ' - Adj. Close'][day_idx + 1] / factors_price[company_idx]])
+        output_data[day_idx].append(data[company + ' - Adj. Close'][day_idx + 1] / factors_price[company_idx])
 
 #TODO as parameter
 train_split = int(0.6 * num_days)
@@ -89,7 +89,7 @@ epoch = 500
 for i in range(epoch):
     ptr = 0
     for j in range(no_of_batches):
-        inp, out = train_data[ptr:ptr+batch_size], train_output[ptr:ptr+batch_size][0].transpose()
+        inp, out = train_data[ptr:ptr+batch_size], train_output[ptr:ptr+batch_size]
         ptr+=batch_size
         sess.run(minimize,{data: inp, target: out})
     print("Epoch ",str(i))
