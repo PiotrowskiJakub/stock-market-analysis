@@ -15,17 +15,12 @@ data = quandl.get(companies, start_date=start_date, end_date=end_date)
 
 # There is no data for weekends, so end_date - start_date isn't best thing to do here
 # Instead take first dimension from API data (days x metrics)
-num_days = data.shape[0]
+# -1 because there is no prediction for last day
+num_days = data.shape[0] - 1
 num_stocks = len(companies)
 
-"""ndarray solution
-How many metrics per company we want to push. Right now it's 2: price difference and volume
-num_metrics = 2
-stock_data = np.ndarray(shape=(num_days, num_stocks * num_metrics), dtype=np.float32)
-"""
-
-stock_data = [[] for _ in range(num_days - 1)]
-output_data = [[] for _ in range(num_days - 1)]
+stock_data = [[] for _ in range(num_days)]
+output_data = [[] for _ in range(num_days)]
 factors_price = np.ndarray(shape=(num_stocks), dtype=np.float32)
 factors_volume = np.ndarray(shape=(num_stocks), dtype=np.float32)
 
@@ -35,23 +30,13 @@ for idx, company in enumerate(companies):
     factors_price[idx] = data[company + ' - Adj. Close'][0]
     factors_volume[idx] = data[company + ' - Volume'][0]
 
-""" ndarray solution, this is really fucked up.
-# For each day create array containing stocks and volumes for each company
-for day_idx in range(num_days):
-    for company_idx, company in enumerate(companies):
-        # Note here because it's not obvious. Why company_idx * num_metrics:
-        # fuck this, append would be much easier.
-        stock_data[day_idx][company_idx * num_metrics] = (data[company + ' - Close'][day_idx] - data[company + ' - Open'][day_idx]) / factors_price[company_idx]
-        stock_data[day_idx][(company_idx * num_metrics) + 1] = (data[company + ' - Volume'][day_idx] / factors_volume[company_idx])
-"""
-
 # Use python arrays to collect data and then convert to numpy ndarray
-for day_idx in range(num_days - 1):
+for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
         stock_data[day_idx].append([data[company + ' - Adj. Close'][day_idx] / factors_price[company_idx]])
         stock_data[day_idx].append([data[company + ' - Volume'][day_idx] / factors_volume[company_idx]])
 
-for day_idx in range(num_days - 1):
+for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
         output_data[day_idx].append([data[company + ' - Adj. Close'][day_idx + 1] / factors_price[company_idx]])
 
