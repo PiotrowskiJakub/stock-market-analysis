@@ -47,8 +47,8 @@ for day_idx in range(num_days):
 # Use python arrays to collect data and then convert to numpy ndarray
 for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
-        stock_data[day_idx].append(data[company + ' - Adj. Close'][day_idx] / factors_price[company_idx])
-        stock_data[day_idx].append(data[company + ' - Volume'][day_idx] / factors_volume[company_idx])
+        stock_data[day_idx].append([data[company + ' - Adj. Close'][day_idx] / factors_price[company_idx]])
+        stock_data[day_idx].append([data[company + ' - Volume'][day_idx] / factors_volume[company_idx]])
 
 #TODO as parameter
 train_split = int(0.6 * num_days)
