@@ -2,13 +2,13 @@ import quandl
 import numpy as np
 from datetime import date
 
-# quandl.ApiConfig.api_key = 'XXX'
+quandl.ApiConfig.api_key = 'jPGm5gjF1imaezGU9QMU'
 
 companies = [
         'WIKI/MSFT',
         'WIKI/AAPL'
         ]
-start_date = date(2016, 1, 31)
+start_date = date(2015, 1, 31)
 end_date = date(2017, 2, 13)
 
 data = quandl.get(companies, start_date=start_date, end_date=end_date)
@@ -75,8 +75,9 @@ loss = tf.nn.l2_loss(tf.subtract(prediction, target))
 optimizer = tf.train.AdamOptimizer()
 minimize = optimizer.minimize(loss)
 
-mistakes = tf.not_equal(tf.argmax(target, 1), tf.argmax(prediction, 1))
-error = tf.reduce_mean(tf.cast(mistakes, tf.float32))
+def accuracy(predictions, labels):
+  err = np.sum( np.isclose(predictions, labels, 0.0, 0.005) ) / (predictions.shape[0] * predictions.shape[1])
+  return (100.0 * err)
 
 # Model execution
 init_op = tf.global_variables_initializer()
@@ -93,10 +94,9 @@ for i in range(epoch):
         ptr+=batch_size
         sess.run(minimize,{data: inp, target: out})
     if (i % 100 == 0):
-        valid_err = sess.run(error,{data: valid_data, target: valid_output})
-        print('Epoch {:2d} valid error {:3.1f}%'.format(i + 1, 100 * valid_err))
+        print('Validation accuracy: %.1f%%' % accuracy(sess.run(prediction,{data: valid_data}), valid_output))
     print("Epoch ",str(i))
-    
-test_err = sess.run(error,{data: test_data, target: test_output})
-print('Epoch {:2d} test error {:3.1f}%'.format(i + 1, 100 * test_err))
+ 
+test_acc = sess.run(prediction,{data: test_data})
+print('Test accuracy: %.1f%%' % accuracy(test_acc, test_output))
 sess.close()
