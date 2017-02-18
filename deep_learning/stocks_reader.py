@@ -65,11 +65,11 @@ data = tf.placeholder(tf.float32, [None, companies_number * 2, 1]) # [batch_size
 target = tf.placeholder(tf.float32, [None, companies_number]) # [batch_size, companies_number, output_dimension]
 
 cell = tf.contrib.rnn.LSTMCell(num_hidden)
-_, state = tf.nn.dynamic_rnn(cell, data, dtype=tf.float32)
+_, rnn_state = tf.nn.dynamic_rnn(cell, data, dtype=tf.float32)
 
 weight = tf.Variable(tf.truncated_normal([num_hidden, int(target.get_shape()[1])]))
 bias = tf.Variable(tf.constant(0.1, shape=[target.get_shape()[1]]))
-prediction = tf.matmul(state.h, weight) + bias
+prediction = tf.matmul(rnn_state.h, weight) + bias
                       
 loss = tf.nn.l2_loss(tf.subtract(prediction, target))
 optimizer = tf.train.AdamOptimizer()
