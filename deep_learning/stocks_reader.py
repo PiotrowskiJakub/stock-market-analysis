@@ -2,7 +2,7 @@ import quandl
 import numpy as np
 from datetime import date
 
-quandl.ApiConfig.api_key = 'XXX'
+# quandl.ApiConfig.api_key = 'XXX'
 
 companies = [
         'WIKI/MSFT',
@@ -38,7 +38,7 @@ for day_idx in range(num_days):
 
 for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
-        output_data[day_idx].append(data[company + ' - Adj. Close'][day_idx + 1] / factors_price[company_idx])
+        output_data[day_idx].append([data[company + ' - Adj. Close'][day_idx + 1] / factors_price[company_idx]])
 
 #TODO as parameter
 train_split = int(0.6 * num_days)
@@ -58,20 +58,23 @@ test_output = output_data[valid_split:test_split, :]
 
 # Model creation
 import tensorflow as tf
+batch_size = 1
 companies_number = len(companies)
-data = tf.placeholder(tf.float32, [None, companies_number * 2, 1]) # [batch_size, companies_number * 2, input_dimension]
-target = tf.placeholder(tf.float32, [None, companies_number]) # [batch_size, companies_number]
-
 num_hidden = companies_number * 4
+
+data = tf.placeholder(tf.float32, [None, companies_number * 2, 1]) # [batch_size, companies_number * 2, input_dimension]
+target = tf.placeholder(tf.float32, [None, companies_number, 1]) # [batch_size, companies_number, output_dimension]
+
 cell = tf.contrib.rnn.LSTMCell(num_hidden)
 val, _ = tf.nn.dynamic_rnn(cell, data, dtype=tf.float32) # [batch_size, max_time, cell.output_size]
-val = tf.reshape(val, [-1, num_hidden]) # [batch_size * max_time, cell.output_size] - convert to 2D
 
-weight = tf.Variable(tf.truncated_normal([num_hidden, int(target.get_shape()[1])]))
+weight = tf.Variable(tf.truncated_normal([batch_size, num_hidden, int(target.get_shape()[1])]))
 bias = tf.Variable(tf.constant(0.1, shape=[target.get_shape()[1]]))
 prediction = tf.matmul(val, weight) + bias
                       
-loss = tf.nn.l2_loss(tf.subtract(prediction, target))
+#loss = tf.nn.l2_loss(tf.subtract(prediction, target))
+#loss = -tf.reduce_sum(target * tf.log(tf.clip_by_value(prediction,1e-10,1.0)))
+loss = -tf.reduce_sum(tf.matmul(tf.log(tf.clip_by_value(prediction,1e-10,1.0)), target))
 optimizer = tf.train.AdamOptimizer()
 minimize = optimizer.minimize(loss)
 
@@ -83,17 +86,19 @@ init_op = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init_op)
 
-batch_size = 1
 no_of_batches = int(int(len(train_data)) / batch_size)
-epoch = 500
+epoch = 50
 for i in range(epoch):
     ptr = 0
     for j in range(no_of_batches):
         inp, out = train_data[ptr:ptr+batch_size], train_output[ptr:ptr+batch_size]
         ptr+=batch_size
         sess.run(minimize,{data: inp, target: out})
+    #if (i % 100 == 0):
+    #    valid_err = sess.run(error,{data: valid_data, target: valid_output})
+    #    print('Epoch {:2d} valid error {:3.1f}%'.format(i + 1, 100 * valid_err))
     print("Epoch ",str(i))
     
-incorrect = sess.run(error,{data: valid_data, target: valid_output})
-print('Epoch {:2d} error {:3.1f}%'.format(i + 1, 100 * incorrect))
+test_err = sess.run(error,{data: test_data, target: test_output})
+print('Epoch {:2d} test error {:3.1f}%'.format(i + 1, 100 * test_err))
 sess.close()
