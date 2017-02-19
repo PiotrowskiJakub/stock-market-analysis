@@ -8,7 +8,7 @@ companies = [
         'WIKI/MSFT',
         'WIKI/AAPL'
         ]
-start_date = date(2015, 1, 31)
+start_date = date(2010, 1, 31)
 end_date = date(2017, 2, 13)
 
 data = quandl.get(companies, start_date=start_date, end_date=end_date)
@@ -33,8 +33,8 @@ for idx, company in enumerate(companies):
 # Use python arrays to collect data and then convert to numpy ndarray
 for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
-        stock_data[day_idx].append([data[company + ' - Adj. Close'][day_idx] / factors_price[company_idx]])
-        stock_data[day_idx].append([data[company + ' - Volume'][day_idx] / factors_volume[company_idx]])
+        stock_data[day_idx].append([data[company + ' - Adj. Close'][day_idx] / factors_price[company_idx], 
+                                   data[company + ' - Volume'][day_idx] / factors_volume[company_idx]])
 
 for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
@@ -56,47 +56,39 @@ train_output = output_data[:train_split, :]
 valid_output = output_data[train_split:valid_split, :]
 test_output = output_data[valid_split:test_split, :]
 
+
 # Model creation
 import tensorflow as tf
+from model import StocksPredictorModel
 companies_number = len(companies)
-num_hidden = companies_number * 4
 
-data = tf.placeholder(tf.float32, [None, companies_number * 2, 1]) # [batch_size, companies_number * 2, input_dimension]
-target = tf.placeholder(tf.float32, [None, companies_number]) # [batch_size, companies_number, output_dimension]
+data = tf.placeholder(tf.float32, [None, companies_number, 2])
+target = tf.placeholder(tf.float32, [None, companies_number])
+dropout = tf.placeholder(tf.float32)
 
-cell = tf.contrib.rnn.LSTMCell(num_hidden)
-_, rnn_state = tf.nn.dynamic_rnn(cell, data, dtype=tf.float32)
-
-weight = tf.Variable(tf.truncated_normal([num_hidden, int(target.get_shape()[1])]))
-bias = tf.Variable(tf.constant(0.1, shape=[target.get_shape()[1]]))
-prediction = tf.matmul(rnn_state.h, weight) + bias
-                      
-loss = tf.nn.l2_loss(tf.subtract(prediction, target))
-optimizer = tf.train.AdamOptimizer()
-minimize = optimizer.minimize(loss)
-
-def accuracy(predictions, labels):
-  err = np.sum( np.isclose(predictions, labels, 0.0, 0.005) ) / (predictions.shape[0] * predictions.shape[1])
-  return (100.0 * err)
+model = StocksPredictorModel(data, target, dropout, companies_number * 4)
 
 # Model execution
-init_op = tf.global_variables_initializer()
 sess = tf.Session()
-sess.run(init_op)
+sess.run(tf.global_variables_initializer())
 
-batch_size = 1
+batch_size = 10
 no_of_batches = int(int(len(train_data)) / batch_size)
-epoch = 500
+epoch = 100
 for i in range(epoch):
     ptr = 0
     for j in range(no_of_batches):
         inp, out = train_data[ptr:ptr+batch_size], train_output[ptr:ptr+batch_size]
         ptr+=batch_size
-        sess.run(minimize,{data: inp, target: out})
-    if (i % 100 == 0):
-        print('Validation accuracy: %.1f%%' % accuracy(sess.run(prediction,{data: valid_data}), valid_output))
-    print("Epoch ",str(i))
+        sess.run(model.optimize, {data: inp, target: out, dropout: 0.5})
+    print('Validation accuracy: %.1f%%' % model.accuracy(sess.run(model.prediction,{data: valid_data, dropout: 1}), valid_output))
+    #error = sess.run(model.error, {data: valid_data, target: valid_output, dropout: 1})
+    #print('Epoch {:2d} error {:3.1f}%'.format(i + 1, 100 * error))
  
-test_acc = sess.run(prediction,{data: test_data})
-print('Test accuracy: %.1f%%' % accuracy(test_acc, test_output))
+test_err = sess.run(model.error, {data: test_data, target: test_output, dropout: 1})
+print('Epoch {:2d} error {:3.1f}%'.format(i + 1, 100 * test_err))
+
+prediction1 = sess.run(model.prediction,{data: [[[0.969,1.274],[0.98,0.912]]], dropout: 1})
+prediction2 = sess.run(model.prediction,{data: [[[1,1],[1,1]]], dropout: 1})
+
 sess.close()
