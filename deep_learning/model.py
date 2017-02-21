@@ -16,7 +16,7 @@ def lazy_property(function):
 
 class StocksPredictorModel:
 
-    def __init__(self, data, target, dropout, learning_rate=0.001, num_hidden=8, num_layers=1):
+    def __init__(self, data, target, dropout, learning_rate=0.001, num_hidden=128, num_layers=4):
         self.data = data
         self.target = target
         self.dropout = dropout
@@ -50,7 +50,7 @@ class StocksPredictorModel:
 
     @lazy_property
     def optimize(self):
-        optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+        optimizer = tf.train.AdagradOptimizer(learning_rate=self.learning_rate)
         return optimizer.minimize(self.cost)
 
     @lazy_property

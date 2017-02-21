@@ -82,24 +82,25 @@ data = tf.placeholder(tf.float32, [None, companies_number, 2])
 target = tf.placeholder(tf.float32, [None, companies_number])
 dropout = tf.placeholder(tf.float32)
 
-model = StocksPredictorModel(data, target, dropout, companies_number * 4)
+model = StocksPredictorModel(data, target, dropout, 0.001)
 
 # Model execution
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-batch_size = 1
+batch_size = 5
 no_of_batches = int(int(len(train_data)) / batch_size)
-epoch = 10000
+epoch = 100000
 for i in range(epoch):
     ptr = 0
     for j in range(no_of_batches):
         inp, out = train_data[ptr:ptr+batch_size], train_output[ptr:ptr+batch_size]
         ptr+=batch_size
-        sess.run(model.optimize, {data: inp, target: out, dropout: 0.5})
-    print('Validation accuracy: %.1f%%' % model.accuracy(sess.run(model.prediction,{data: valid_data, dropout: 1}), valid_output))
-    #error = sess.run(model.error, {data: valid_data, target: valid_output, dropout: 1})
-    #print('Epoch {:2d} error {:3.1f}%'.format(i + 1, 100 * error))
+        _, cost, predictions = sess.run([model.optimize, model.cost, model.prediction],
+                                     {data: inp, target: out, dropout: 1.0})
+    acc = model.accuracy(predictions, out)
+    print('Minibatch loss at step %d: %f' % (i, cost))
+    print('Minibatch accuracy: %.1f%%' % acc)
  
 test_err = sess.run(model.error, {data: test_data, target: test_output, dropout: 1})
 print('Epoch {:2d} error {:3.1f}%'.format(i + 1, 100 * test_err))
