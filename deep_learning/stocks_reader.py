@@ -6,10 +6,26 @@ quandl.ApiConfig.api_key = 'jPGm5gjF1imaezGU9QMU'
 
 companies = [
         'WIKI/MSFT',
-        'WIKI/AAPL'
+        'WIKI/AAPL',
+        'WIKI/FB',
+        'WIKI/AXP',
+        'WIKI/BA',
+        'WIKI/CAT',
+        'WIKI/CSCO',
+        'WIKI/CVX',
+        'WIKI/DD',
+        'WIKI/XOM',
+        'WIKI/GE',
+        'WIKI/GS',
+        'WIKI/HD',
+        'WIKI/IBM',
+        'WIKI/INTC',
+        'WIKI/JNJ',
+        'WIKI/KO',
+        'WIKI/JPM'
         ]
-start_date = date(2010, 1, 31)
-end_date = date(2017, 2, 13)
+start_date = date(2017, 2, 1)
+end_date = date(2017, 2, 19)
 
 data = quandl.get(companies, start_date=start_date, end_date=end_date)
 
@@ -33,7 +49,7 @@ for idx, company in enumerate(companies):
 # Use python arrays to collect data and then convert to numpy ndarray
 for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
-        stock_data[day_idx].append([data[company + ' - Adj. Close'][day_idx] / factors_price[company_idx], 
+        stock_data[day_idx].append([data[company + ' - Adj. Close'][day_idx] / factors_price[company_idx],
                                    data[company + ' - Volume'][day_idx] / factors_volume[company_idx]])
 
 for day_idx in range(num_days):
