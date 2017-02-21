@@ -102,10 +102,10 @@ for i in range(epoch):
     print('Minibatch loss at step %d: %f' % (i, cost))
     print('Minibatch accuracy: %.1f%%' % acc)
  
-test_err = sess.run(model.error, {data: test_data, target: test_output, dropout: 1})
-print('Epoch {:2d} error {:3.1f}%'.format(i + 1, 100 * test_err))
+valid_acc = model.accuracy(sess.run(model.prediction,{data: valid_data, dropout: 1.0}), valid_output)
+print('Validation accuracy: %.1f%%' % valid_acc)
 
-prediction1 = sess.run(model.prediction,{data: [[[0.969,1.274],[0.98,0.912]]], dropout: 1})
-prediction2 = sess.run(model.prediction,{data: [[[1,1],[1,1]]], dropout: 1})
+test_acc = model.accuracy(sess.run(model.prediction,{data: test_data, dropout: 1.0}), test_output)
+print('Test accuracy: %.1f%%' % test_acc)
 
 sess.close()
