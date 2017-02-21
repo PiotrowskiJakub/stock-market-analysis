@@ -88,9 +88,9 @@ model = StocksPredictorModel(data, target, dropout, companies_number * 4)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-batch_size = 10
+batch_size = 1
 no_of_batches = int(int(len(train_data)) / batch_size)
-epoch = 100
+epoch = 10000
 for i in range(epoch):
     ptr = 0
     for j in range(no_of_batches):
