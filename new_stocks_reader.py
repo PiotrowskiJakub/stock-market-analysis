@@ -6,25 +6,9 @@ quandl.ApiConfig.api_key = 'jPGm5gjF1imaezGU9QMU'
 
 companies = [
         'WIKI/MSFT',
-        'WIKI/AAPL',
-        'WIKI/FB',
-        'WIKI/AXP',
-        'WIKI/BA',
-        'WIKI/CAT',
-        'WIKI/CSCO',
-        'WIKI/CVX',
-        'WIKI/DD',
-        'WIKI/XOM',
-        'WIKI/GE',
-        'WIKI/GS',
-        'WIKI/HD',
-        'WIKI/IBM',
-        'WIKI/INTC',
-        'WIKI/JNJ',
-        'WIKI/KO',
-        'WIKI/JPM'
+        'WIKI/AAPL'
         ]
-start_date = date(2017, 2, 1)
+start_date = date(2017, 1, 1)
 end_date = date(2017, 2, 19)
 data = quandl.get(companies, start_date=start_date, end_date=end_date)
 
