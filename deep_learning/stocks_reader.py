@@ -31,8 +31,9 @@ data = quandl.get(companies, start_date=start_date, end_date=end_date)
 
 # There is no data for weekends, so end_date - start_date isn't best thing to do here
 # Instead take first dimension from API data (days x metrics)
-# -1 because there is no prediction for last day
-num_days = data.shape[0] - 1
+# -num_forecasts because there is no prediction for 'num_forecasts' last days
+num_forecasts = 5
+num_days = data.shape[0] - num_forecasts
 num_stocks = len(companies)
 
 stock_data = [[] for _ in range(num_days)]
@@ -54,7 +55,10 @@ for day_idx in range(num_days):
 
 for day_idx in range(num_days):
     for company_idx, company in enumerate(companies):
-        output_data[day_idx].append(data[company + ' - Adj. Close'][day_idx + 1] / factors_price[company_idx])
+        next_prices = data[company + ' - Adj. Close'].values
+        next_prices = next_prices[day_idx + 1:day_idx + 1 + num_forecasts] / factors_price[company_idx]
+        change_percentage = (np.max(next_prices)/stock_data[day_idx][company_idx][0]) - 1
+        output_data[day_idx].append(change_percentage)
 
 #TODO as parameter
 train_split = int(0.6 * num_days)
@@ -88,9 +92,9 @@ model = StocksPredictorModel(data, target, dropout, 0.001)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-batch_size = 5
+batch_size = 1
 no_of_batches = int(int(len(train_data)) / batch_size)
-epoch = 100000
+epoch = 10000
 for i in range(epoch):
     ptr = 0
     for j in range(no_of_batches):
@@ -102,6 +106,9 @@ for i in range(epoch):
     print('Minibatch loss at step %d: %f' % (i, cost))
     print('Minibatch accuracy: %.1f%%' % acc)
  
+train_err = sess.run(model.error,{data: train_data, target: train_output, dropout: 1.0})
+print('Training error {:3.1f}%'.format(i + 1, 100 * train_err))
+
 valid_acc = model.accuracy(sess.run(model.prediction,{data: valid_data, dropout: 1.0}), valid_output)
 print('Validation accuracy: %.1f%%' % valid_acc)
 

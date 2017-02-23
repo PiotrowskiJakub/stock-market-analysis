@@ -42,11 +42,12 @@ class StocksPredictorModel:
         out_size = int(self.target.get_shape()[1])
         weight, bias = self._weight_and_bias(self._num_hidden, out_size)
 
-        return tf.matmul(last, weight) + bias
+        return tf.tanh(tf.matmul(last, weight) + bias)
 
     @lazy_property
     def cost(self):
-        return tf.nn.l2_loss(tf.subtract(self.prediction, self.target))
+        #return tf.nn.l2_loss(tf.subtract(self.prediction, self.target))
+        return -tf.reduce_sum(self.target * tf.log(self.prediction))
 
     @lazy_property
     def optimize(self):
