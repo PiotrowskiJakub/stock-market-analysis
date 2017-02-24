@@ -58,6 +58,7 @@ for day_idx in range(num_days):
         next_prices = data[company + ' - Adj. Close'].values
         next_prices = next_prices[day_idx + 1:day_idx + 1 + num_forecasts] / factors_price[company_idx]
         change_percentage = (np.max(next_prices)/stock_data[day_idx][company_idx][0]) - 1
+        change_percentage = np.clip(change_percentage * 10, -1.0, 1.0)
         output_data[day_idx].append(change_percentage)
 
 #TODO as parameter
