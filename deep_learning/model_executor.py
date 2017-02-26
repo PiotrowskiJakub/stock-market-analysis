@@ -4,7 +4,7 @@ import stocks_reader
 from model import StocksPredictorModel
 companies_number = len(stocks_reader.COMPANIES)
 
-train_input, train_output, valid_input, valid_output, test_input, test_output = stocks_reader.read_data()
+X_train, y_train, X_valid, y_valid, X_test, y_test = stocks_reader.read_data()
 
 data = tf.placeholder(tf.float32, [None, companies_number, 2])
 target = tf.placeholder(tf.float32, [None, companies_number])
@@ -17,12 +17,12 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 batch_size = 1
-no_of_batches = int(int(len(train_input)) / batch_size)
+no_of_batches = int(int(len(X_train)) / batch_size)
 epoch = 10000
 for i in range(epoch):
     ptr = 0
     for j in range(no_of_batches):
-        inp, out = train_input[ptr:ptr+batch_size], train_output[ptr:ptr+batch_size]
+        inp, out = X_train[ptr:ptr+batch_size], y_train[ptr:ptr+batch_size]
         ptr+=batch_size
         _, cost, predictions = sess.run([model.optimize, model.cost, model.prediction],
                                      {data: inp, target: out, dropout: 1.0})
@@ -30,13 +30,13 @@ for i in range(epoch):
     print('Minibatch loss at step %d: %f' % (i, cost))
     print('Minibatch accuracy: %.1f%%' % acc)
  
-train_err = sess.run(model.error,{data: train_input, target: train_output, dropout: 1.0})
+train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
 print('Training error {:3.1f}%'.format(i + 1, 100 * train_err))
 
-valid_acc = model.accuracy(sess.run(model.prediction,{data: valid_input, dropout: 1.0}), valid_output)
+valid_acc = model.accuracy(sess.run(model.prediction,{data: X_valid, dropout: 1.0}), y_valid)
 print('Validation accuracy: %.1f%%' % valid_acc)
 
-test_acc = model.accuracy(sess.run(model.prediction,{data: test_input, dropout: 1.0}), test_output)
+test_acc = model.accuracy(sess.run(model.prediction,{data: X_test, dropout: 1.0}), y_test)
 print('Test accuracy: %.1f%%' % test_acc)
 
 sess.close()
