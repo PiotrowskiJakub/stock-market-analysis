@@ -47,7 +47,8 @@ class StocksPredictorModel:
     @lazy_property
     def cost(self):
         #return tf.nn.l2_loss(tf.subtract(self.prediction, self.target))
-        return -tf.reduce_sum(self.target * tf.log(self.prediction))
+        cross_entropy = -tf.reduce_sum(self.target * tf.log(self.prediction))
+        return tf.reduce_mean(cross_entropy)
 
     @lazy_property
     def optimize(self):
