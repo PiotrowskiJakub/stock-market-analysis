@@ -4,6 +4,14 @@ from datetime import date
 
 quandl.ApiConfig.api_key = 'jPGm5gjF1imaezGU9QMU'
 
+FORECASTS_NUM = 5   # Number of days to forecast
+CHANGE_THRESHOLD = 0.3
+
+start_date = date(2017, 1, 1)
+end_date = date(2017, 2, 19)
+
+COMPANIES = ['WIKI/MSFT', 'WIKI/AAPL']
+'''
 COMPANIES = [
         'WIKI/MSFT',
         'WIKI/AAPL',
@@ -24,17 +32,31 @@ COMPANIES = [
         'WIKI/KO',
         'WIKI/JPM'
         ]
-start_date = date(2017, 2, 1)
-end_date = date(2017, 2, 19)
+'''
+
+    
+def change_to_vector(change_percentage):
+    """Creates a vector that shows price changes.
+    [1 0 0] - the price fell by more than 3%
+    [0 1 0] - the price has not changed significantly
+    [0 0 1] - the price rose by more than 3%
+    """
+    change_vector = ([0] * 3)
+    i = 1
+    if change_percentage < -CHANGE_THRESHOLD:
+        i = 0
+    elif change_percentage > CHANGE_THRESHOLD:
+        i = 2
+    change_vector[i] = 1
+    return change_vector
 
 def read_data():
     data = quandl.get(COMPANIES, start_date=start_date, end_date=end_date)
     
     # There is no data for weekends, so end_date - start_date isn't best thing to do here
     # Instead take first dimension from API data (days x metrics)
-    # -num_forecasts because there is no prediction for 'num_forecasts' last days
-    num_forecasts = 5
-    num_days = data.shape[0] - num_forecasts
+    # -FORECASTS_NUM because there is no prediction for FORECASTS_NUM last days
+    num_days = data.shape[0] - FORECASTS_NUM
     num_stocks = len(COMPANIES)
     
     stock_data = [[] for _ in range(num_days)]
@@ -57,10 +79,10 @@ def read_data():
     for day_idx in range(num_days):
         for company_idx, company in enumerate(COMPANIES):
             next_prices = data[company + ' - Adj. Close'].values
-            next_prices = next_prices[day_idx + 1:day_idx + 1 + num_forecasts] / factors_price[company_idx]
+            next_prices = next_prices[day_idx + 1:day_idx + 1 + FORECASTS_NUM] / factors_price[company_idx]
             change_percentage = (np.max(next_prices)/stock_data[day_idx][company_idx][0]) - 1
             change_percentage = np.clip(change_percentage * 10, -1.0, 1.0)
-            output_data[day_idx].append(change_percentage)
+            output_data[day_idx].append(change_to_vector(change_percentage))
     
     #TODO as parameter
     train_split = int(0.6 * num_days)
