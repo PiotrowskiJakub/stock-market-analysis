@@ -44,11 +44,13 @@ class StocksPredictorModel:
 
         prediction = tf.matmul(last, weight) + bias
         prediction = tf.reshape(prediction, [-1, companies_num, classes_num])
-        return tf.nn.softmax(prediction)
+        #return tf.nn.softmax(prediction)
+        return prediction
 
     @lazy_property
     def cost(self):
-        return -tf.reduce_sum(self.target * tf.log(self.prediction))
+        #return -tf.reduce_sum(self.target * tf.log(self.prediction))
+        return tf.nn.softmax_cross_entropy_with_logits(labels=self.target, logits=self.prediction)
 
     @lazy_property
     def optimize(self):

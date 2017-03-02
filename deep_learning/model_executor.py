@@ -16,17 +16,20 @@ model = StocksPredictorModel(data, target, dropout, 0.003)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-batch_size = 1
+batch_size = 5
 batches_num = int(int(len(X_train)) / batch_size)
-epoch = 1000
+epoch = 2000
 for i in range(epoch):
     ptr = 0
     for j in range(batches_num):
         inp, out = X_train[ptr:ptr+batch_size], y_train[ptr:ptr+batch_size]
         ptr+=batch_size
         _, cost = sess.run([model.optimize, model.cost],
-                                     {data: inp, target: out, dropout: 1.0})
-    print('Minibatch loss at step %d: %f' % (i, cost))
+                                     {data: inp, target: out, dropout: 0.5})
+    print('Minibatch loss at step %d: %f' % (i, cost[0][0]))
+    if i % 500 == 0:
+        train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
+        print('Training error {:3.1f}%'.format(100 * train_err))
  
 train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
 print('Training error {:3.1f}%'.format(100 * train_err))

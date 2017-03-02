@@ -7,7 +7,7 @@ quandl.ApiConfig.api_key = 'jPGm5gjF1imaezGU9QMU'
 FORECASTS_NUM = 5   # Number of days to forecast
 CHANGE_THRESHOLD = 0.3
 
-start_date = date(2017, 1, 1)
+start_date = date(2016, 9, 1)
 end_date = date(2017, 2, 19)
 
 COMPANIES = ['WIKI/MSFT', 'WIKI/AAPL']
@@ -17,12 +17,8 @@ COMPANIES = [
         'WIKI/AAPL',
         'WIKI/FB',
         'WIKI/AXP',
-        'WIKI/BA',
         'WIKI/CAT',
         'WIKI/CSCO',
-        'WIKI/CVX',
-        'WIKI/DD',
-        'WIKI/XOM',
         'WIKI/GE',
         'WIKI/GS',
         'WIKI/HD',
