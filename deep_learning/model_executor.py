@@ -1,6 +1,6 @@
 # Model creation
 import tensorflow as tf
-import stocks_reader 
+import stocks_reader
 from model import StocksPredictorModel
 companies_num = len(stocks_reader.COMPANIES)
 
@@ -13,24 +13,38 @@ dropout = tf.placeholder(tf.float32)
 model = StocksPredictorModel(data, target, dropout, 0.003)
 
 # Model execution
+saver = tf.train.Saver()
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
+
+restore = False
+save = False
+checkpoint_path = './checkpoints/model.ckpt'
 
 batch_size = 5
 batches_num = int(int(len(X_train)) / batch_size)
 epoch = 2000
+
+if(restore):
+    print('Restoring model...')
+    saver.restore(sess, checkpoint_path)
+
 for i in range(epoch):
     ptr = 0
     for j in range(batches_num):
         inp, out = X_train[ptr:ptr+batch_size], y_train[ptr:ptr+batch_size]
         ptr+=batch_size
         _, cost = sess.run([model.optimize, model.cost],
-                                     {data: inp, target: out, dropout: 0.5})
+                                     {data: inp, target: out, dropout: 0.6})
     print('Minibatch loss at step %d: %f' % (i, cost[0][0]))
     if i % 500 == 0:
         train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
         print('Training error {:3.1f}%'.format(100 * train_err))
- 
+
+if(save):
+    print('Saving model...')
+    save_path = saver.save(sess, checkpoint_path)
+
 train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
 print('Training error {:3.1f}%'.format(100 * train_err))
 
