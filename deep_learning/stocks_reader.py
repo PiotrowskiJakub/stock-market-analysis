@@ -1,4 +1,5 @@
 import quandl
+import math
 import numpy as np
 from datetime import date
 
@@ -69,8 +70,11 @@ def read_data():
     # Use python arrays to collect data and then convert to numpy ndarray
     for day_idx in range(num_days):
         for company_idx, company in enumerate(COMPANIES):
-            stock_data[day_idx].append([data.filter(regex=company + ' - Adj. Close').iloc[day_idx][0] / factors_price[company_idx],
-                                       data.filter(regex=company + ' - Volume').iloc[day_idx][0] / factors_volume[company_idx]])
+            price = data.filter(regex=company + ' - Adj. Close').iloc[day_idx][0] / factors_price[company_idx]
+            volume = data.filter(regex=company + ' - Volume').iloc[day_idx][0] / factors_volume[company_idx]
+            if(math.isnan(price) or math.isnan(volume)):
+                print('Warning! NaN values found for company ' + company)
+            stock_data[day_idx].append([price, volume])
 
     for day_idx in range(num_days):
         for company_idx, company in enumerate(COMPANIES):
