@@ -7,8 +7,8 @@ from six.moves import cPickle as pickle
 
 quandl.ApiConfig.api_key = 'jPGm5gjF1imaezGU9QMU'
 
-FORECASTS_NUM = 5   # Number of days to forecast
-CHANGE_THRESHOLD = 0.3
+FORECASTS_NUM = 10   # Number of days to forecast
+CHANGE_THRESHOLD_BOUNDARIES = [0.05, 0.03] # Price change boundaries
 
 start_date = date(2010, 1, 1)
 end_date = date(2017, 3, 10)
@@ -39,17 +39,24 @@ def load_pickle(filename):
 
 def change_to_vector(change_percentage):
     """Creates a vector that shows price changes.
-    [1 0 0] - the price fell by more than 3%
-    [0 1 0] - the price has not changed significantly
-    [0 0 1] - the price rose by more than 3%
+    [1 0 0 0 0] - the price fell by more than 5%
+    [0 1 0 0 0] - the price fell by more than 3% but less than 5%
+    [0 0 1 0 0] - the price has not changed significantly
+    [0 0 0 1 0] - the price rose by more than 3% but less than 5%
+    [0 0 0 0 1] - the price rose by more than 5%
     """
-    change_vector = ([0] * 3)
-    i = 1
-    if change_percentage < -CHANGE_THRESHOLD:
-        i = 0
-    elif change_percentage > CHANGE_THRESHOLD:
-        i = 2
-    change_vector[i] = 1
+    vector_length = len(CHANGE_THRESHOLD_BOUNDARIES) * 2 + 1
+    change_vector = ([0] * vector_length)
+    
+    for idx, threshold in enumerate(CHANGE_THRESHOLD_BOUNDARIES):
+        if change_percentage < -threshold:
+            change_vector[idx] = 1
+            return change_vector
+        elif change_percentage > threshold:
+            change_vector[vector_length - 1 - idx] = 1
+            return change_vector
+    
+    change_vector[len(CHANGE_THRESHOLD_BOUNDARIES)] = 1
     return change_vector
 
 def read_data():
@@ -95,7 +102,6 @@ def read_data():
             next_prices = data.filter(regex=company + ' - Adj. Close').values
             next_prices = next_prices[day_idx + 1:day_idx + 1 + FORECASTS_NUM] / factors_price[company_idx]
             change_percentage = (np.max(next_prices)/stock_data[day_idx][company_idx][0]) - 1
-            change_percentage = np.clip(change_percentage * 10, -1.0, 1.0)
             output_data[day_idx].append(change_to_vector(change_percentage))
 
     #TODO as parameter
