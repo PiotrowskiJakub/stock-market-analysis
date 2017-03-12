@@ -10,7 +10,8 @@ data = tf.placeholder(tf.float32, [None, companies_num, X_train.shape[2]])
 target = tf.placeholder(tf.float32, [None, companies_num, y_train.shape[2]])
 dropout = tf.placeholder(tf.float32)
 
-model = StocksPredictorModel(data, target, dropout, 0.003)
+num_hidden = int(companies_num * 1.5)
+model = StocksPredictorModel(data, target, dropout, num_hidden, learning_rate=0.003)
 
 # Model execution
 saver = tf.train.Saver()
@@ -23,7 +24,7 @@ checkpoint_path = './checkpoints/model.ckpt'
 
 batch_size = 5
 batches_num = int(int(len(X_train)) / batch_size)
-epoch = 2000
+epoch = 1000
 
 if(restore):
     print('Restoring model...')
@@ -35,7 +36,7 @@ for i in range(epoch):
         inp, out = X_train[ptr:ptr+batch_size], y_train[ptr:ptr+batch_size]
         ptr+=batch_size
         _, cost = sess.run([model.optimize, model.cost],
-                                     {data: inp, target: out, dropout: 0.6})
+                                     {data: inp, target: out, dropout: 0.5})
     print('Minibatch loss at step %d: %f' % (i, cost[0][0]))
     if i % 500 == 0:
         train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})

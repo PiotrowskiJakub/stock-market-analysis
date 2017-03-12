@@ -15,13 +15,13 @@ def lazy_property(function):
 
 class StocksPredictorModel:
 
-    def __init__(self, data, target, dropout, learning_rate=0.001, num_hidden=128, num_layers=3):
+    def __init__(self, data, target, dropout, num_hidden, num_layers=5, learning_rate=0.001):
         self.data = data
         self.target = target
         self.dropout = dropout
-        self._learning_rate = learning_rate
         self._num_hidden = num_hidden
         self._num_layers = num_layers
+        self._learning_rate = learning_rate
         self.prediction
         self.optimize
         self.error
@@ -29,7 +29,7 @@ class StocksPredictorModel:
     @lazy_property
     def prediction(self):
         # Recurrent network.
-        network = tf.contrib.rnn.LSTMCell(self._num_hidden)
+        network = tf.contrib.rnn.GRUCell(self._num_hidden)
         network = tf.contrib.rnn.DropoutWrapper(
             network, output_keep_prob=self.dropout)
         network = tf.contrib.rnn.MultiRNNCell([network] * self._num_layers)
@@ -44,17 +44,15 @@ class StocksPredictorModel:
 
         prediction = tf.matmul(last, weight) + bias
         prediction = tf.reshape(prediction, [-1, companies_num, classes_num])
-        #return tf.nn.softmax(prediction)
         return prediction
 
     @lazy_property
     def cost(self):
-        #return -tf.reduce_sum(self.target * tf.log(self.prediction))
         return tf.nn.softmax_cross_entropy_with_logits(labels=self.target, logits=self.prediction)
 
     @lazy_property
     def optimize(self):
-        optimizer = tf.train.AdamOptimizer(learning_rate=self._learning_rate)
+        optimizer = tf.train.AdagradOptimizer(learning_rate=self._learning_rate)
         return optimizer.minimize(self.cost)
 
     @lazy_property
