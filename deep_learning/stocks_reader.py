@@ -1,7 +1,9 @@
 import quandl
+import os
 import math
 import numpy as np
 from datetime import date
+from six.moves import cPickle as pickle
 
 quandl.ApiConfig.api_key = 'jPGm5gjF1imaezGU9QMU'
 
@@ -13,25 +15,27 @@ end_date = date(2017, 3, 10)
 
 COMPANIES_SYMBOLS = ["AMAT", "AAPL", "QSII", "CAMP", "IDTI", "LRCX", "MGRC", "MENT", "JKHY", "ADBE", "CERN", "CY", "FISV", "LLTC", "MSFT", "SIGM", "TECD", "PLAB", "MXIM", "CRUS", "DGII", "SYMC", "CSCO", "XLNX", "PRGS", "QCOM", "ZBRA", "EFII", "KOPN", "SPNS", "SNPS", "AVID", "CREE", "INTU", "MCHP", "PRKR", "SANM", "UTEK", "DSPG", "MIND", "SSYS", "VECO", "BRKS", "CTXS", "HLIT", "IVAC", "KFRC", "NATI", "NTAP", "RSYS", "RCII", "ANSS", "CHKP", "CSGS", "KVHI", "PEGA", "SEAC", "SYKE", "TTEC", "VSAT", "YHOO", "OSIS", "POWI", "RMBS", "RNWK", "SYNT", "TTWO", "AMKR", "CTSH", "MANH", "MSTR", "ULTI", "VRSN", "EPAY", "BRCD", "EGAN", "EXTR", "FFIV", "FNSR", "HSII", "IMMR", "INAP", "JCOM", "NTCT", "NVDA", "PCTI", "PRFT", "QUIK", "ACLS", "CCMP", "HSTM", "ISSC", "LPSN", "MRVL", "SLAB", "SPRT", "TTMI", "MOSY", "OMCL", "PDFS", "CPSI", "STX", "SYNA", "VRNT", "CALD", "FORM", "BLKB", "INTX", "MPWR", "UCTT", "BIDU", "SPWR", "CVLT", "FSLR", "GUID", "IPGP", "SNCR", "CAVM", "ENOC", "GLUU", "GSIT", "TYPE", "RBCN", "SMCI", "VRTU", "ERII", "AVGO", "FTNT", "MDSO", "VRSK"]
 COMPANIES = ['WIKI/' + company for company in COMPANIES_SYMBOLS]
-'''
-COMPANIES = [
-        'WIKI/MSFT',
-        'WIKI/AAPL',
-        'WIKI/FB',
-        'WIKI/AXP',
-        'WIKI/CAT',
-        'WIKI/CSCO',
-        'WIKI/GE',
-        'WIKI/GS',
-        'WIKI/HD',
-        'WIKI/IBM',
-        'WIKI/INTC',
-        'WIKI/JNJ',
-        'WIKI/KO',
-        'WIKI/JPM'
-        ]
-'''
 
+def save_pickle(data, filename):
+    print('Pickling %s.' % filename)
+    try:
+        with open(filename, 'wb') as f:
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+    except Exception as e:
+        print('Unable to save data to', filename, ':', e)
+    return data
+
+def load_pickle(filename):
+    if os.path.exists(filename):
+        print('Loading %s.' % filename)
+        try:
+            with open(filename, 'rb') as f:
+                return pickle.load(f)
+        except Exception as e:
+            print('Unable to process data from', filename, ':', e)
+            raise
+    else:
+        return None
 
 def change_to_vector(change_percentage):
     """Creates a vector that shows price changes.
@@ -49,7 +53,10 @@ def change_to_vector(change_percentage):
     return change_vector
 
 def read_data():
-    data = quandl.get(COMPANIES, start_date=start_date, end_date=end_date)
+    data_filename = './data.pickle'
+    data = load_pickle(data_filename)
+    if(data is None):
+        data = save_pickle(quandl.get(COMPANIES, start_date=start_date, end_date=end_date), data_filename)
 
     # There is no data for weekends, so end_date - start_date isn't best thing to do here
     # Instead take first dimension from API data (days x metrics)
