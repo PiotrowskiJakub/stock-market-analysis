@@ -72,8 +72,14 @@ def read_data():
     # For each company get first price and volume to normalize data
     # Store it for de-normalization
     for idx, company in enumerate(COMPANIES):
-        factors_price[idx] = data.filter(regex=company + ' - Adj. Close').iloc[0][0]
-        factors_volume[idx] = data.filter(regex=company + ' - Volume').iloc[0][0]
+        adj_close = data.filter(regex=company + ' - Adj. Close')
+        volume = data.filter(regex=company + ' - Volume')
+
+        if(adj_close.empty or volume.empty):
+            print("Warning! Empty data for " + company)
+        else:
+            factors_price[idx] = adj_close.iloc[0][0]
+            factors_volume[idx] = volume.iloc[0][0]
 
     # Use python arrays to collect data and then convert to numpy ndarray
     for day_idx in range(num_days):
