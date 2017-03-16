@@ -7,7 +7,7 @@ companies_num = len(stocks_reader.COMPANIES)
 X_train, y_train, X_valid, y_valid, X_test, y_test = stocks_reader.read_data()
 
 data = tf.placeholder(tf.float32, [None, companies_num, X_train.shape[2]])
-target = tf.placeholder(tf.float32, [None, companies_num, y_train.shape[2]])
+target = tf.placeholder(tf.float32, [None, companies_num - 1, y_train.shape[2]])
 dropout = tf.placeholder(tf.float32)
 
 num_hidden = int(companies_num * 1.5)
@@ -22,7 +22,7 @@ restore = False
 save = False
 checkpoint_path = './checkpoints/model.ckpt'
 
-batch_size = 5
+batch_size = 10
 batches_num = int(int(len(X_train)) / batch_size)
 epoch = 1000
 
@@ -38,7 +38,7 @@ for i in range(epoch):
         _, cost = sess.run([model.optimize, model.cost],
                                      {data: inp, target: out, dropout: 0.5})
     print('Minibatch loss at step %d: %f' % (i, cost[0][0]))
-    if i % 500 == 0:
+    if i % 100 == 0:
         train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
         print('Training error {:3.1f}%'.format(100 * train_err))
 
