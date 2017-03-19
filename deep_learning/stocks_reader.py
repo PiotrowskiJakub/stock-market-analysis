@@ -16,6 +16,7 @@ start_date = date(2010, 1, 1)
 end_date = date(2017, 3, 15)
 
 COMPANIES = ["^IXIC", "AMAT", "AAPL", "QSII", "CAMP", "IDTI", "LRCX", "MGRC", "MENT", "JKHY", "ADBE", "CERN", "CY", "FISV", "LLTC", "MSFT", "SIGM", "TECD", "PLAB", "MXIM", "CRUS", "DGII", "SYMC", "CSCO", "XLNX", "PRGS", "QCOM", "ZBRA", "EFII", "KOPN", "SPNS", "SNPS", "CREE", "INTU", "MCHP", "PRKR", "SANM", "UTEK", "DSPG", "MIND", "SSYS", "VECO", "BRKS", "CTXS", "HLIT", "IVAC", "KFRC", "NATI", "NTAP", "RSYS", "RCII", "ANSS", "CHKP", "CSGS", "KVHI", "PEGA", "SEAC", "SYKE", "TTEC", "VSAT", "YHOO", "OSIS", "POWI", "RMBS", "RNWK", "SYNT", "TTWO", "AMKR", "CTSH", "MANH", "MSTR", "ULTI", "VRSN", "EPAY", "BRCD", "EGAN", "EXTR", "FFIV", "FNSR", "HSII", "IMMR", "INAP", "JCOM", "NTCT", "NVDA", "PCTI", "PRFT", "QUIK", "ACLS", "CCMP", "HSTM", "ISSC", "LPSN", "MRVL", "SLAB", "SPRT", "TTMI", "MOSY", "OMCL", "PDFS", "CPSI", "STX", "SYNA", "VRNT", "CALD", "FORM", "BLKB", "INTX", "MPWR", "UCTT", "BIDU", "SPWR", "CVLT", "FSLR", "GUID", "IPGP", "SNCR", "CAVM", "ENOC", "GLUU", "GSIT", "TYPE", "RBCN", "SMCI", "VRTU", "ERII", "AVGO", "FTNT", "MDSO", "VRSK"]
+companies_count = len(COMPANIES)
 # COMPANIES = ['WIKI/' + company for company in COMPANIES_SYMBOLS]
 
 def save_pickle(data, filename):
@@ -115,9 +116,9 @@ def read_data():
             output_data.append(change_to_vector(change_percentage))
 
     #TODO as parameter
-    train_split = int(0.6 * num_days)
-    valid_split = int(0.2 * num_days) + train_split
-    test_split = int(0.2 * num_days) + valid_split
+    train_split = int(0.6 * num_days * companies_count)
+    valid_split = int(0.2 * num_days * companies_count) + train_split
+    test_split = int(0.2 * num_days * companies_count) + valid_split
 
     stock_data = np.array(stock_data, dtype=np.float32)
     output_data = np.array(output_data, dtype=np.float32)
