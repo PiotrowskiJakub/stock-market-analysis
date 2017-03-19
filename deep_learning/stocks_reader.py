@@ -76,8 +76,8 @@ def read_data():
     num_days = data.shape[1] - FORECASTS_NUM
     num_stocks = len(COMPANIES)
 
-    stock_data = [[] for _ in range(num_days)]
-    output_data = [[] for _ in range(num_days)]
+    stock_data = []
+    output_data = []
     factors_price = np.ndarray(shape=(num_stocks), dtype=np.float32)
     factors_volume = np.ndarray(shape=(num_stocks), dtype=np.float32)
 
@@ -94,22 +94,23 @@ def read_data():
             factors_volume[idx] = volume[0]
 
     # Use python arrays to collect data and then convert to numpy ndarray
-    for day_idx in range(num_days):
-        for company_idx, company in enumerate(COMPANIES):
+    for company_idx, company in enumerate(COMPANIES):
+        for day_idx in range(num_days):
             price = adj_closes[company][day_idx] / factors_price[company_idx]
             volume = volumes[company][day_idx] / factors_volume[company_idx]
             if(math.isnan(price) or math.isnan(volume)):
                 print('Warning! NaN values found for company %s and day %s' % (company, day_idx))
-            stock_data[day_idx].append([price, volume])
+            stock_data.append([price, volume])
 
-    for day_idx in range(num_days):
-        for company_idx, company in enumerate(COMPANIES):
-            if company_idx == 0:    # Drop NASDAQ index
-                continue
+    for company_idx, company in enumerate(COMPANIES):
+        if company_idx == 0:    # Drop NASDAQ index
+            continue
+        for day_idx in range(num_days):
             next_prices = adj_closes[company].values
             next_prices = next_prices[day_idx + 1:day_idx + 1 + FORECASTS_NUM] / factors_price[company_idx]
-            change_percentage = (np.max(next_prices)/stock_data[day_idx][company_idx][0]) - 1
-            output_data[day_idx].append(change_to_vector(change_percentage))
+            current_price = adj_closes[company].values[day_idx] / factors_price[company_idx]
+            change_percentage = (np.max(next_prices)/current_price) - 1
+            output_data.append(change_to_vector(change_percentage))
 
     #TODO as parameter
     train_split = int(0.6 * num_days)
