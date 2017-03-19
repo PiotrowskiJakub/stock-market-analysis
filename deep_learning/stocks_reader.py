@@ -95,6 +95,8 @@ def read_data():
 
     # Use python arrays to collect data and then convert to numpy ndarray
     for company_idx, company in enumerate(COMPANIES):
+        if company_idx == 0:    # Drop NASDAQ index
+            continue
         for day_idx in range(num_days):
             price = adj_closes[company][day_idx] / factors_price[company_idx]
             volume = volumes[company][day_idx] / factors_volume[company_idx]

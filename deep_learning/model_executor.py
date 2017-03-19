@@ -6,8 +6,8 @@ companies_num = len(stocks_reader.COMPANIES)
 
 X_train, y_train, X_valid, y_valid, X_test, y_test = stocks_reader.read_data()
 
-data = tf.placeholder(tf.float32, [None, companies_num, X_train.shape[2]])
-target = tf.placeholder(tf.float32, [None, companies_num - 1, y_train.shape[2]])
+data = tf.placeholder(tf.float32, [None, 1, X_train.shape[1]])
+target = tf.placeholder(tf.float32, [None, 1, y_train.shape[1]])
 dropout = tf.placeholder(tf.float32)
 
 num_hidden = int(companies_num * 1.5)
@@ -22,7 +22,7 @@ restore = False
 save = False
 checkpoint_path = './checkpoints/model.ckpt'
 
-batch_size = 10
+batch_size = 1
 batches_num = int(int(len(X_train)) / batch_size)
 epoch = 1000
 
