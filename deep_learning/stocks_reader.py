@@ -122,6 +122,9 @@ def read_data():
 
     stock_data = np.array(stock_data, dtype=np.float32)
     output_data = np.array(output_data, dtype=np.float32)
+    
+    stock_data = stock_data.reshape(stock_data.shape[0], 1, stock_data.shape[1])
+    output_data = output_data.reshape(output_data.shape[0], 1, output_data.shape[1])
 
     train_data = stock_data[:train_split, :]
     valid_data = stock_data[train_split:valid_split, :]

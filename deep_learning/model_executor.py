@@ -6,8 +6,8 @@ companies_num = len(stocks_reader.COMPANIES)
 
 X_train, y_train, X_valid, y_valid, X_test, y_test = stocks_reader.read_data()
 
-input_shape = X_train.shape[1]
-output_shape = y_train.shape[1]
+input_shape = X_train.shape[2]
+output_shape = y_train.shape[2]
 
 data = tf.placeholder(tf.float32, [None, 1, input_shape])
 target = tf.placeholder(tf.float32, [None, 1, output_shape])
@@ -25,9 +25,9 @@ restore = False
 save = False
 checkpoint_path = './checkpoints/model.ckpt'
 
-batch_size = 5
+batch_size = 10
 batches_num = int(int(len(X_train)) / batch_size)
-epoch = 1000
+epoch = 100
 
 if(restore):
     print('Restoring model...')
@@ -36,14 +36,13 @@ if(restore):
 for i in range(epoch):
     ptr = 0
     for j in range(batches_num):
-        inp = X_train[ptr:ptr+batch_size].reshape(batch_size, 1, input_shape)
-        out = y_train[ptr:ptr+batch_size].reshape(batch_size, 1, output_shape)
+        inp, out = X_train[ptr:ptr+batch_size], y_train[ptr:ptr+batch_size]
         ptr+=batch_size
         _, cost = sess.run([model.optimize, model.cost],
                                      {data: inp, target: out, dropout: 0.5})
         if j % 1000 == 0:
-            print('Minibatch loss at step %d: %f' % (j, cost[0][0]))
-    if i % 100 == 0:
+            print('[Epoch %d] loss at batch %d: %f' % (i, j, cost[0][0]))
+    if i % 10 == 0:
         train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
         print('Training error {:3.1f}%'.format(100 * train_err))
 
