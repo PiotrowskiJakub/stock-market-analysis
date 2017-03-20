@@ -13,7 +13,7 @@ data = tf.placeholder(tf.float32, [None, 1, input_shape])
 target = tf.placeholder(tf.float32, [None, 1, output_shape])
 dropout = tf.placeholder(tf.float32)
 
-num_hidden = companies_num
+num_hidden = 100
 model = StocksPredictorModel(data, target, dropout, num_hidden, learning_rate=0.003)
 
 # Model execution
@@ -41,7 +41,7 @@ for i in range(epoch):
         _, cost = sess.run([model.optimize, model.cost],
                                      {data: inp, target: out, dropout: 0.5})
         if j % 1000 == 0:
-            print('[Epoch %d] loss at batch %d: %f' % (i, j, cost[0][0]))
+            print('[Epoch %d] loss at batch %d: %f' % (i, j, cost.mean()))
     if i % 10 == 0:
         train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
         print('Training error {:3.1f}%'.format(100 * train_err))
