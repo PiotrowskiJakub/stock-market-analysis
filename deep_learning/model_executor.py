@@ -1,4 +1,5 @@
 # Model creation
+import time
 import tensorflow as tf
 import stocks_reader
 from model import StocksPredictorModel
@@ -13,8 +14,8 @@ data = tf.placeholder(tf.float32, [None, 1, input_shape])
 target = tf.placeholder(tf.float32, [None, 1, output_shape])
 dropout = tf.placeholder(tf.float32)
 
-num_hidden = 100
-model = StocksPredictorModel(data, target, dropout, num_hidden, learning_rate=0.003)
+num_hidden = 120
+model = StocksPredictorModel(data, target, dropout, num_hidden, 5, learning_rate=0.001)
 
 # Model execution
 saver = tf.train.Saver()
@@ -22,29 +23,22 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 restore = False
-save = False
+save = True
 checkpoint_path = './checkpoints/model.ckpt'
-
-batch_size = 10
-batches_num = int(int(len(X_train)) / batch_size)
-epoch = 100
 
 if(restore):
     print('Restoring model...')
     saver.restore(sess, checkpoint_path)
+    
+epoch = 100000
 
 for i in range(epoch):
-    ptr = 0
-    for j in range(batches_num):
-        inp, out = X_train[ptr:ptr+batch_size], y_train[ptr:ptr+batch_size]
-        ptr+=batch_size
-        _, cost = sess.run([model.optimize, model.cost],
-                                     {data: inp, target: out, dropout: 0.5})
-        if j % 1000 == 0:
-            print('[Epoch %d] loss at batch %d: %f' % (i, j, cost.mean()))
-    if i % 10 == 0:
-        train_err = sess.run(model.error,{data: X_train, target: y_train, dropout: 1.0})
-        print('Training error {:3.1f}%'.format(100 * train_err))
+    _, cost = sess.run([model.optimize, model.cost],
+                                 {data: X_train, target: y_train, dropout: 0.5})
+    print(time.strftime('%X') + ' - Minibatch loss at epoch %d: %f' % (i, cost.mean()))
+    if i % 1000 == 0:
+        train_err = sess.run(model.error,{data: X_valid, target: y_valid, dropout: 1.0})
+        print('Validation error {:3.1f}%'.format(100 * train_err))
 
 if(save):
     print('Saving model...')
@@ -59,6 +53,6 @@ print('Validation error {:3.1f}%'.format(100 * valid_err))
 test_err = sess.run(model.error,{data: X_test, target: y_test, dropout: 1.0})
 print('Test error {:3.1f}%'.format(100 * test_err))
 
-predictions = sess.run(model.prediction,{data: X_train, dropout: 1.0})
+predictions = sess.run(model.prediction,{data: X_valid, dropout: 1.0})
 
 sess.close()
