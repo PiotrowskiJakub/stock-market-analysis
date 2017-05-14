@@ -29,7 +29,7 @@ class StocksPredictorModel:
     @lazy_property
     def prediction(self):
         # Recurrent network.
-        network = tf.contrib.rnn.GRUCell(self._num_hidden)
+        network = tf.contrib.rnn.LSTMCell(self._num_hidden)
         network = tf.contrib.rnn.DropoutWrapper(
             network, output_keep_prob=self.dropout)
         network = tf.contrib.rnn.MultiRNNCell([network] * self._num_layers)
@@ -52,7 +52,7 @@ class StocksPredictorModel:
 
     @lazy_property
     def optimize(self):
-        optimizer = tf.train.AdagradOptimizer(learning_rate=self._learning_rate)
+        optimizer = tf.train.AdamOptimizer(learning_rate=self._learning_rate)
         return optimizer.minimize(self.cost)
 
     @lazy_property
