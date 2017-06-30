@@ -2,6 +2,7 @@ require 'net/http'
 
 class MoneyApi
   DATA_SOURCE_URL = 'http://www.money.pl/ajax/gielda/finanse/'
+  QUARTERS_PER_PAGE = 4
 
   attr_reader :url
 
@@ -9,7 +10,7 @@ class MoneyApi
     @url = URI.parse(DATA_SOURCE_URL)
   end
 
-  def get_data(params)
+  def get_data(stock_symbol:, period: 'Q', t: 't', page:)
     attributes = %w(
       date
       net_income
@@ -36,8 +37,14 @@ class MoneyApi
     )
 
     year_data = [{}, {}, {}, {}]
+    call_params = {
+      isin: stock_symbol,
+      p: period,
+      t: t,
+      o: page * QUARTERS_PER_PAGE
+    }
 
-    response = Net::HTTP.post_form(url, params)
+    response = Net::HTTP.post_form(url, call_params)
     response_body = Nokogiri::HTML(response.body)
 
     data_rows = response_body.css('tr:not(.ikony)')

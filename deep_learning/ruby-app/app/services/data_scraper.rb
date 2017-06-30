@@ -3,17 +3,15 @@ require 'nokogiri'
 
 class DataScraper
   DATA_SOURCE_URL = 'http://www.money.pl/ajax/gielda/finanse/'
-  attr_reader :stock_symbol, :offset, :url, :params
+  attr_reader :stock_symbol, :page, :url, :params
 
   def initialize(stock_symbol: 'PLOPTTC00011')
     @stock_symbol = stock_symbol
-    @offset = 0
+    @page = 0
     @url = URI.parse(DATA_SOURCE_URL)
     @params = {
-      isin: stock_symbol,
-      p: 'Q',
-      t: 't',
-      o: @offset
+      stock_symbol: stock_symbol,
+      page: @page
     }
   end
 
@@ -31,7 +29,7 @@ class DataScraper
   private
 
   def next_page!
-    @params[:o] += 4
+    @params[:page] += 1
   end
 
   def money_api
