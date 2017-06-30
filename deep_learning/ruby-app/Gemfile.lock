@@ -1,10 +1,3 @@
-GIT
-  remote: git://github.com/tolhaje/sequel_postgresql_triggers.git
-  revision: 8824af9dd710923dc64a9e86c40cad4996e59515
-  specs:
-    sequel_postgresql_triggers (1.1.0)
-      sequel
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -76,6 +69,7 @@ GEM
       ruby_dep (~> 1.2)
     lumberjack (1.0.11)
     method_source (0.8.2)
+    mini_portile2 (2.1.0)
     minitest (5.10.1)
     multi_json (1.12.1)
     multi_xml (0.6.0)
@@ -83,6 +77,8 @@ GEM
     mustermann-grape (1.0.0)
       mustermann (~> 1.0.0)
     nenv (0.3.0)
+    nokogiri (1.7.1)
+      mini_portile2 (~> 2.1.0)
     notiffany (0.1.1)
       nenv (~> 0.1)
       shellany (~> 0.0)
@@ -167,6 +163,7 @@ DEPENDENCIES
   fakeredis
   grape
   guard-rspec
+  nokogiri
   nyan-cat-formatter
   oj
   pg
@@ -177,7 +174,6 @@ DEPENDENCIES
   rspec_sequel_matchers
   sequel (~> 4.38)
   sequel_pg
-  sequel_postgresql_triggers!
   sidekiq
   thin
   vcr
@@ -187,4 +183,4 @@ RUBY VERSION
    ruby 2.4.1p111
 
 BUNDLED WITH
-   1.14.6
+   1.15.1
