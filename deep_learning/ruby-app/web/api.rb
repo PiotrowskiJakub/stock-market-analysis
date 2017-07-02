@@ -6,6 +6,7 @@ module RubyApp
     default_format :json
     formatter :json, ->(object, env) { Oj.dump(object) }
     prefix :api
+  end
 
   class API < Grape::API
     mount RubyApp::APIv1
